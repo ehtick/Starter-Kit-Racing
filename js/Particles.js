@@ -41,7 +41,7 @@ export class SmokeTrails {
 
 	update( dt, vehicle ) {
 
-		const shouldEmit = vehicle.driftIntensity > 0.25 && vehicle.colliding;
+		const shouldEmit = vehicle.driftIntensity > 0.25;
 
 		// Emit new particles from back wheel positions
 		if ( shouldEmit ) {

@@ -2,7 +2,6 @@ import * as THREE from 'three';
 
 export const ORIENT_DEG = { 0: 0, 10: 180, 16: 90, 22: 270 };
 
-export const CELL = 9.99 * 0.75; // 7.4925
 export const CELL_RAW = 9.99;
 export const GRID_SCALE = 0.75;
 
@@ -334,8 +333,6 @@ export function buildTrack( scene, models, customCells ) {
 		}
 
 	}
-
-	return;
 
 }
 

@@ -8,6 +8,7 @@ const _zAxis = new THREE.Vector3();
 const _newZ = new THREE.Vector3();
 const _mat4 = new THREE.Matrix4();
 const _quat = new THREE.Quaternion();
+const _up = new THREE.Vector3( 0, 1, 0 );
 
 const SPEED_SCALE = 12.5;
 const LINEAR_DAMP = 0.1;
@@ -37,9 +38,6 @@ export class Vehicle {
 
 		this.modelVelocity = new THREE.Vector3();
 		this.prevModelPos = new THREE.Vector3( 3.5, 0, 5 );
-
-		this.colliding = false;
-		this.normal = new THREE.Vector3( 0, 1, 0 );
 
 		this.container = new THREE.Group();
 		this.bodyNode = null;
@@ -99,14 +97,8 @@ export class Vehicle {
 
 	update( dt, controlsInput ) {
 
-		const isGrounded = true;
-
-		if ( isGrounded ) {
-
-			this.inputX = controlsInput.x;
-			this.inputZ = controlsInput.z;
-
-		}
+		this.inputX = controlsInput.x;
+		this.inputZ = controlsInput.z;
 
 		let direction = Math.sign( this.linearSpeed );
 		if ( direction === 0 ) direction = Math.abs( this.inputZ ) > 0.1 ? Math.sign( this.inputZ ) : 1;
@@ -118,29 +110,14 @@ export class Vehicle {
 
 		this.container.rotateY( this.angularSpeed * dt );
 
-		if ( isGrounded ) {
+		_tmpVec.set( 0, 1, 0 ).applyQuaternion( this.container.quaternion );
 
-			if ( ! this.colliding ) {
+		if ( _tmpVec.y > 0.5 ) {
 
-				if ( this.bodyNode ) this.bodyNode.position.set( 0, 0.1, 0 );
-				this.inputZ = 0;
-
-			}
-
-			this.normal.set( 0, 1, 0 );
-
-			_tmpVec.set( 0, 1, 0 ).applyQuaternion( this.container.quaternion );
-
-			if ( this.normal.dot( _tmpVec ) > 0.5 ) {
-
-				const targetQuat = this.alignWithY( this.container.quaternion, this.normal );
-				this.container.quaternion.slerp( targetQuat, 0.2 );
-
-			}
+			const targetQuat = this.alignWithY( this.container.quaternion, _up );
+			this.container.quaternion.slerp( targetQuat, 0.2 );
 
 		}
-
-		this.colliding = isGrounded;
 
 		const targetSpeed = this.inputZ;
 
@@ -190,7 +167,7 @@ export class Vehicle {
 		this.acceleration = THREE.MathUtils.lerp(
 			this.acceleration,
 			this.linearSpeed + ( 0.25 * this.linearSpeed * Math.abs( this.linearSpeed ) ),
-			dt * 1
+			dt
 		);
 
 		if ( this.spherePos.y < - 10 ) {
