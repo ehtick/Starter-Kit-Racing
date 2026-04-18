@@ -39,6 +39,7 @@ dirLight.castShadow = true;
 dirLight.shadow.mapSize.setScalar( 4096 );
 dirLight.shadow.camera.near = 0.5;
 dirLight.shadow.camera.far = 60;
+dirLight.shadow.radius = 4;
 scene.add( dirLight );
 
 const hemiLight = new THREE.HemisphereLight( 0xc8d8e8, 0x7a8a5a, 1 );

@@ -256,7 +256,7 @@ export class Vehicle {
 			dt * 5
 		);
 
-		this.bodyNode.position.y = THREE.MathUtils.lerp( this.bodyNode.position.y, 0.2, dt * 5 );
+		this.bodyNode.position.y = THREE.MathUtils.lerp( this.bodyNode.position.y, 0.3, dt * 5 );
 
 	}
 
