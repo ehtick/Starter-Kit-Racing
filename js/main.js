@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { LightProbeGrid } from 'three/addons/lighting/LightProbeGrid.js';
+import { LightProbeGridHelper } from 'three/addons/helpers/LightProbeGridHelper.js';
 import { createWorldSettings, createWorld, addBroadphaseLayer, addObjectLayer, enableCollision, registerAll, updateWorld, rigidBody, box, MotionType } from 'crashcat';
 import { Vehicle } from './Vehicle.js';
 import { Camera } from './Camera.js';
@@ -31,7 +33,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xadb2ba );
 scene.fog = new THREE.Fog( 0xadb2ba, 30, 55 );
 
-const dirLight = new THREE.DirectionalLight( 0xffffff, 5 );
+const dirLight = new THREE.DirectionalLight( 0xffffff, 4 );
 dirLight.position.set( 11.4, 15, -5.3 );
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.setScalar( 4096 );
@@ -39,7 +41,7 @@ dirLight.shadow.camera.near = 0.5;
 dirLight.shadow.camera.far = 60;
 scene.add( dirLight );
 
-const hemiLight = new THREE.HemisphereLight( 0xc8d8e8, 0x7a8a5a, 1.5 );
+const hemiLight = new THREE.HemisphereLight( 0xc8d8e8, 0x7a8a5a, 1 );
 scene.add( hemiLight );
 
 
@@ -136,6 +138,22 @@ async function init() {
 
 	buildTrack( scene, models, customCells );
 
+	// Probes
+
+	const probeHeight = 6;
+	const probes = new LightProbeGrid(
+		hw * 2, probeHeight, hd * 2,
+		Math.max( 4, Math.round( hw / 4 ) ),
+		2,
+		Math.max( 4, Math.round( hd / 4 ) ),
+	);
+	probes.position.set( bounds.centerX, probeHeight / 2, bounds.centerZ );
+	probes.bake( renderer, scene, { cubemapSize: 32, near: 0.1, far: groundSize } );
+	scene.add( probes );
+
+	// scene.add( new LightProbeGridHelper( probes, 0.5 ) );
+
+	//
 
 	const worldSettings = createWorldSettings();
 	worldSettings.gravity = [ 0, - 9.81, 0 ];
