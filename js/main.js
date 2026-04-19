@@ -33,7 +33,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color( 0xadb2ba );
 scene.fog = new THREE.Fog( 0xadb2ba, 30, 55 );
 
-const dirLight = new THREE.DirectionalLight( 0xffffff, 4 );
+const dirLight = new THREE.DirectionalLight( 0xffffff, 3 );
 dirLight.position.set( 11.4, 15, -5.3 );
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.setScalar( 4096 );
@@ -42,7 +42,8 @@ dirLight.shadow.camera.far = 60;
 dirLight.shadow.radius = 4;
 scene.add( dirLight );
 
-const hemiLight = new THREE.HemisphereLight( 0xc8d8e8, 0x7a8a5a, 1 );
+const hemiLight = new THREE.HemisphereLight( 0xc8d8e8, 0x7a8a5a, 2 );
+hemiLight.position.copy( dirLight.position )
 scene.add( hemiLight );
 
 
