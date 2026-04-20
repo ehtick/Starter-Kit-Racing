@@ -70,11 +70,13 @@ async function loadModels() {
 
 			loader.load( `models/${ name }.glb`, ( gltf ) => {
 
+				const meshes = [];
 				gltf.scene.traverse( ( child ) => {
 
 					if ( child.isMesh ) {
 
 						child.material.side = THREE.FrontSide;
+						meshes.push( child );
 
 					}
 
@@ -87,7 +89,18 @@ async function loadModels() {
 
 				}
 
-				models[ name ] = gltf.scene;
+				if ( meshes.length === 1 ) {
+
+					const mesh = meshes[ 0 ];
+					mesh.removeFromParent();
+					models[ name ] = mesh;
+
+				} else {
+
+					models[ name ] = gltf.scene;
+
+				}
+
 				resolve();
 
 			}, undefined, reject );

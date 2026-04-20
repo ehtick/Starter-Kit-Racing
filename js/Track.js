@@ -132,21 +132,8 @@ export function buildTrack( scene, models, customCells ) {
 
 	}
 
-	if ( ! customCells ) {
-
-		// Place hand-authored decorations for the default track
-		for ( const [ gx, gz, key, orient ] of DECO_CELLS ) {
-
-			const piece = placePiece( models, key, gx, gz, orient );
-			if ( piece ) decoGroup.add( piece );
-
-		}
-
-	}
-
 	{
 
-		// Auto-generate decorations to fill any gaps
 		const occupied = new Set();
 		let minX = Infinity, maxX = - Infinity;
 		let minZ = Infinity, maxZ = - Infinity;
@@ -161,10 +148,18 @@ export function buildTrack( scene, models, customCells ) {
 
 		}
 
-		// Also mark existing decoration cells as occupied
+		const emptyPositions = [];
+		const forestPositions = [];
+		const tentPositions = [];
+		const buckets = {
+			'decoration-empty': emptyPositions,
+			'decoration-forest': forestPositions,
+			'decoration-tents': tentPositions,
+		};
+
 		if ( ! customCells ) {
 
-			for ( const [ gx, gz ] of DECO_CELLS ) {
+			for ( const [ gx, gz, key, orient ] of DECO_CELLS ) {
 
 				occupied.add( gx + ',' + gz );
 				minX = Math.min( minX, gx );
@@ -172,14 +167,16 @@ export function buildTrack( scene, models, customCells ) {
 				minZ = Math.min( minZ, gz );
 				maxZ = Math.max( maxZ, gz );
 
+				const x = ( gx + 0.5 ) * CELL_RAW;
+				const z = ( gz + 0.5 ) * CELL_RAW;
+				const rotQ = ( ( ORIENT_DEG[ orient ] ?? 0 ) / 90 ) | 0;
+				buckets[ key ]?.push( x, z, rotQ );
+
 			}
 
 		}
 
 		const pad = 3;
-		const emptyPositions = [];
-		const forestPositions = [];
-		const tentPositions = [];
 
 		// Simple hash for deterministic pseudo-random placement
 		function hash( gx, gz ) {
@@ -212,13 +209,13 @@ export function buildTrack( scene, models, customCells ) {
 
 					} else {
 
-						emptyPositions.push( x, z );
+						emptyPositions.push( x, z, 0 );
 
 					}
 
 				} else {
 
-					forestPositions.push( x, z );
+					forestPositions.push( x, z, 0 );
 
 				}
 
@@ -230,7 +227,7 @@ export function buildTrack( scene, models, customCells ) {
 
 			if ( positions.length === 0 || ! src ) return;
 
-			const count = positions.length / 2;
+			const count = positions.length / 3;
 
 			src.traverse( ( child ) => {
 
@@ -242,7 +239,8 @@ export function buildTrack( scene, models, customCells ) {
 
 				for ( let i = 0; i < count; i ++ ) {
 
-					_dummy.position.set( positions[ i * 2 ], 0.5, positions[ i * 2 + 1 ] );
+					_dummy.position.set( positions[ i * 3 ], 0.5, positions[ i * 3 + 1 ] );
+					_dummy.rotation.y = positions[ i * 3 + 2 ] * Math.PI / 2;
 					_dummy.updateMatrix();
 					inst.setMatrixAt( i, _dummy.matrix );
 
@@ -256,36 +254,7 @@ export function buildTrack( scene, models, customCells ) {
 
 		createInstances( models[ 'decoration-empty' ], emptyPositions );
 		createInstances( models[ 'decoration-forest' ], forestPositions );
-
-		// Place tents with random rotations
-		const tentSrc = models[ 'decoration-tents' ];
-
-		if ( tentSrc && tentPositions.length > 0 ) {
-
-			const tentCount = tentPositions.length / 3;
-
-			tentSrc.traverse( ( child ) => {
-
-				if ( ! child.isMesh ) return;
-
-				const inst = new THREE.InstancedMesh( child.geometry, child.material, tentCount );
-				inst.castShadow = true;
-				inst.receiveShadow = true;
-
-				for ( let i = 0; i < tentCount; i ++ ) {
-
-					_dummy.position.set( tentPositions[ i * 3 ], 0.5, tentPositions[ i * 3 + 1 ] );
-					_dummy.rotation.y = tentPositions[ i * 3 + 2 ] * Math.PI / 2;
-					_dummy.updateMatrix();
-					inst.setMatrixAt( i, _dummy.matrix );
-
-				}
-
-				decoGroup.add( inst );
-
-			} );
-
-		}
+		createInstances( models[ 'decoration-tents' ], tentPositions );
 
 	}
 
