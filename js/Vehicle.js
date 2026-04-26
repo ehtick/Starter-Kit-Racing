@@ -110,7 +110,7 @@ export class Vehicle {
 
 			_forward.set( 0, 0, 1 ).applyQuaternion( this.container.quaternion );
 			const cross = _forward.x * this.inputZ - _forward.z * this.inputX;
-			this.inputX = - cross * 2;
+			this.inputX = THREE.MathUtils.clamp( - cross * 2, - 1, 1 );
 
 			this.linearSpeed = THREE.MathUtils.lerp( this.linearSpeed, MAX_SPEED, dt * 1.5 );
 
