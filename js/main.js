@@ -219,7 +219,8 @@ async function init() {
 	dirLight.target = vehicleGroup;
 
 	const cam = new Camera();
-	cam.targetPosition.copy( vehicle.spherePos );
+	scene.add( cam.debug );
+	cam.smoothedDesired.copy( vehicle.spherePos );
 
 	const controls = new Controls();
 
@@ -267,7 +268,7 @@ async function init() {
 			vehicle.spherePos.z - 5.3
 		);
 
-		cam.update( dt, vehicle.spherePos );
+		cam.update( dt, vehicle.spherePos, vehicle.modelVelocity );
 		particles.update( dt, vehicle );
 		driftMarks.update( dt, vehicle );
 		audio.update( dt, vehicle.linearSpeed / MAX_SPEED, input.z, vehicle.driftIntensity );
