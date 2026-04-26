@@ -10,7 +10,7 @@
 		#editor-link {
 			position: absolute;
 			bottom: 12px;
-			right: 16px;
+			right: 12px;
 			color: #1f2430;
 			font: 400 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 			text-decoration: none;
@@ -25,9 +25,6 @@
 			transition: background 0.15s;
 		}
 		#editor-link:hover { background: #fff; }
-		@media (pointer: coarse) {
-			#editor-link { bottom: auto; top: 12px; right: 12px; }
-		}
 	</style>
 	<script type="importmap">
 	{
@@ -40,7 +37,7 @@
 	</script>
 </head>
 <body>
-	<a id="editor-link" href="editor.html">Create your own track</a>
+	<a id="editor-link" href="editor.html">Create new track</a>
 	<script>
 		const map = new URLSearchParams( location.search ).get( 'map' );
 		if ( map ) {

@@ -12,6 +12,7 @@ import { buildWallColliders, createSphereBody } from './Physics.js';
 import { SmokeTrails } from './Particles.js';
 import { DriftMarks } from './DriftMarks.js';
 import { GameAudio } from './Audio.js';
+import { LapTimer } from './LapTimer.js';
 
 
 const renderer = new THREE.WebGLRenderer( { antialias: true, outputBufferType: THREE.HalfFloatType } );
@@ -230,6 +231,8 @@ async function init() {
 	const audio = new GameAudio();
 	audio.init( cam.camera );
 
+	const lapTimer = new LapTimer( customCells, mapParam );
+
 	const _forward = new THREE.Vector3();
 	const _camLead = new THREE.Vector3();
 
@@ -274,6 +277,9 @@ async function init() {
 		particles.update( dt, vehicle );
 		driftMarks.update( dt, vehicle );
 		audio.update( dt, vehicle.linearSpeed / MAX_SPEED, input.z, vehicle.driftIntensity );
+
+		const hasInput = input.touchActive || Math.abs( input.x ) > 0.05 || Math.abs( input.z ) > 0.05;
+		lapTimer.update( dt, vehicle.spherePos, hasInput );
 
 		renderer.render( scene, cam.camera );
 
