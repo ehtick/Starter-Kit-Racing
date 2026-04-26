@@ -18,59 +18,61 @@
 			align-items: center;
 			gap: 6px;
 			padding: 8px 10px;
-			background: rgba(20, 20, 30, 0.85);
+			background: rgba(255, 255, 255, 0.92);
 			backdrop-filter: blur(12px);
 			-webkit-backdrop-filter: blur(12px);
-			border-radius: 14px;
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+			border-radius: 999px;
+			border: 1px solid rgba(0, 0, 0, 0.06);
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 			z-index: 10;
 		}
 
 		#toolbar button {
-			padding: 8px 16px;
+			padding: 9px 18px;
 			border: none;
-			border-radius: 8px;
+			border-radius: 999px;
 			background: transparent;
-			color: rgba(255, 255, 255, 0.65);
+			color: #4a5260;
 			font-size: 13px;
-			font-weight: 500;
+			font-weight: 400;
 			cursor: pointer;
 			transition: all 0.15s;
 			white-space: nowrap;
 		}
 		#toolbar button:hover {
-			background: rgba(255, 255, 255, 0.1);
-			color: #fff;
+			background: rgba(0, 0, 0, 0.05);
+			color: #1f2430;
 		}
 		#toolbar button.active {
-			background: rgba(255, 255, 255, 0.18);
+			background: #1f2430;
 			color: #fff;
+			box-shadow: 0 2px 6px rgba(31, 36, 48, 0.25);
 		}
 
 		.separator {
 			width: 1px;
 			height: 24px;
-			background: rgba(255, 255, 255, 0.15);
+			background: rgba(0, 0, 0, 0.1);
 			margin: 0 2px;
 			flex-shrink: 0;
 		}
 
 		#toolbar button.action {
-			background: rgba(80, 180, 80, 0.25);
-			color: rgba(140, 255, 140, 0.9);
+			background: #4caf6a;
+			color: #fff;
+			box-shadow: 0 2px 6px rgba(76, 175, 106, 0.3);
 		}
 		#toolbar button.action:hover {
-			background: rgba(80, 180, 80, 0.4);
+			background: #3f9a5a;
 			color: #fff;
 		}
 
 		#toolbar button.danger {
-			color: rgba(255, 255, 255, 0.45);
+			color: #b3603a;
 		}
 		#toolbar button.danger:hover {
-			background: rgba(220, 80, 80, 0.25);
-			color: rgba(255, 140, 140, 0.9);
+			background: rgba(220, 100, 60, 0.12);
+			color: #a64b25;
 		}
 
 		#toast {
@@ -79,13 +81,15 @@
 			left: 50%;
 			transform: translateX(-50%);
 			padding: 10px 24px;
-			background: rgba(20, 20, 30, 0.85);
+			background: rgba(255, 255, 255, 0.95);
 			backdrop-filter: blur(12px);
 			-webkit-backdrop-filter: blur(12px);
-			color: #fff;
-			border-radius: 10px;
-			border: 1px solid rgba(255, 255, 255, 0.1);
+			color: #1f2430;
+			border-radius: 999px;
+			border: 1px solid rgba(0, 0, 0, 0.06);
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 			font-size: 13px;
+			font-weight: 400;
 			opacity: 0;
 			transition: opacity 0.3s;
 			pointer-events: none;
@@ -105,11 +109,11 @@
 </head>
 <body>
 	<div id="toolbar">
+		<button id="btn-pan">View</button>
 		<button id="btn-road" class="active">Road</button>
 		<button id="btn-erase">Erase</button>
 		<div class="separator"></div>
 		<button id="btn-play" class="action">Play</button>
-		<button id="btn-share" class="action">Share</button>
 		<div class="separator"></div>
 		<button id="btn-clear" class="danger">Clear</button>
 	</div>
@@ -149,7 +153,7 @@
 	// ─── State ────────────────────────────────────────────────
 
 	const grid = new Map(); // "gx,gz" → { type, orient, isFinish, mesh }
-	let tool = 'road'; // 'road', 'erase'
+	let tool = 'road'; // 'road', 'erase', 'pan'
 
 	function cellKey( gx, gz ) { return gx + ',' + gz; }
 
@@ -185,20 +189,24 @@
 	scene.add( hemiLight );
 
 	// Ground
-	const groundMat = new THREE.MeshStandardMaterial( { color: 0x369069, metalness: 0 } );
-	const ground = new THREE.Mesh( new THREE.PlaneGeometry( 200, 200 ), groundMat );
+	const gridSize = 30;
+	const cellWorld = CELL_RAW * GRID_SCALE;
+	const worldSize = gridSize * cellWorld;
+
+	const groundMat = new THREE.MeshStandardMaterial( { color: 0x328260, metalness: 0 } );
+	const ground = new THREE.Mesh( new THREE.PlaneGeometry( worldSize, worldSize ), groundMat );
 	ground.rotation.x = - Math.PI / 2;
 	ground.position.y = - 0.14;
 	ground.receiveShadow = true;
 	scene.add( ground );
 
 	// Grid helper
-	const gridSize = 30;
-	const cellWorld = CELL_RAW * GRID_SCALE;
-	const gridHelper = new THREE.GridHelper( gridSize * cellWorld, gridSize, 0x4a7a2a, 0x4a7a2a );
-	gridHelper.position.y = - 0.49;
-	gridHelper.material.opacity = 0.3;
+	const gridHelper = new THREE.GridHelper( worldSize, gridSize, 0x1a4a36, 0x1a4a36 );
+	gridHelper.position.y = - 0.13;
+	gridHelper.material.opacity = 0.25;
 	gridHelper.material.transparent = true;
+	gridHelper.material.depthTest = false;
+	gridHelper.renderOrder = 1;
 	scene.add( gridHelper );
 
 	// Track group (mirrors game structure)
@@ -224,16 +232,37 @@
 		0.1, 200
 	);
 	const cellCenter = 0.5 * CELL_RAW * GRID_SCALE;
-	camera.position.set( cellCenter, 50, cellCenter );
-	camera.lookAt( cellCenter, 0, cellCenter );
 
-	const camTarget = new THREE.Vector3( cellCenter, 0, cellCenter );
+	// Shift the cell centered above the toolbar (mirror the toolbar's bottom
+	// margin above it so the cell sits in the middle of the visible area).
+	function computeCamOffsetZ() {
+
+		const rect = document.getElementById( 'toolbar' ).getBoundingClientRect();
+		const pad = window.innerHeight - rect.bottom;
+		const reserved = window.innerHeight - rect.top + pad;
+		return reserved / window.innerHeight * frustum;
+
+	}
+
+	let camOffsetZ = computeCamOffsetZ();
+	camera.position.set( cellCenter, 50, cellCenter + camOffsetZ );
+	camera.lookAt( cellCenter, 0, cellCenter + camOffsetZ );
+
+	const camTarget = new THREE.Vector3( cellCenter, 0, cellCenter + camOffsetZ );
 
 	window.addEventListener( 'resize', () => {
 
 		const a = window.innerWidth / window.innerHeight;
 		camera.left = - frustum * a;
 		camera.right = frustum * a;
+
+		const newOffset = computeCamOffsetZ();
+		const dz = newOffset - camOffsetZ;
+		camOffsetZ = newOffset;
+		camTarget.z += dz;
+		camera.position.z += dz;
+		camera.lookAt( camTarget.x, 0, camTarget.z );
+
 		camera.updateProjectionMatrix();
 		renderer.setSize( window.innerWidth, window.innerHeight );
 
@@ -663,7 +692,7 @@
 
 		clearGhost();
 
-		if ( tool === 'erase' ) return;
+		if ( tool !== 'road' ) return;
 
 		const key = cellKey( gx, gz );
 		if ( grid.has( key ) ) return; // already occupied
@@ -748,7 +777,6 @@
 
 	const raycaster = new THREE.Raycaster();
 	const mouse = new THREE.Vector2();
-	let hoveredCell = null;
 
 	function screenToGrid( clientX, clientY ) {
 
@@ -834,17 +862,26 @@
 
 	const btnRoad = document.getElementById( 'btn-road' );
 	const btnErase = document.getElementById( 'btn-erase' );
+	const btnPan = document.getElementById( 'btn-pan' );
 
 	function selectTool( t ) {
 
 		tool = t;
 		btnRoad.classList.toggle( 'active', t === 'road' );
 		btnErase.classList.toggle( 'active', t === 'erase' );
+		btnPan.classList.toggle( 'active', t === 'pan' );
+
+		if ( t === 'pan' ) clearGhost();
+
+		updateCursor();
 
 	}
 
 	btnRoad.addEventListener( 'click', () => selectTool( 'road' ) );
 	btnErase.addEventListener( 'click', () => selectTool( 'erase' ) );
+	btnPan.addEventListener( 'click', () => selectTool( 'pan' ) );
+
+	document.getElementById( 'toolbar' ).addEventListener( 'pointerenter', clearGhost );
 
 	function getCellsArray() {
 
@@ -874,32 +911,9 @@
 
 	} );
 
-	document.getElementById( 'btn-share' ).addEventListener( 'click', () => {
-
-		if ( grid.size === 0 ) {
-
-			showToast( 'Draw some road first!' );
-			return;
-
-		}
-
-		const encoded = encodeCells( getCellsArray() );
-		const base = window.location.href.replace( /editor\.html.*/, '' );
-		const url = base + 'index.html?map=' + encoded;
-
-		navigator.clipboard.writeText( url ).then( () => {
-
-			showToast( 'Link copied to clipboard!' );
-
-		} ).catch( () => {
-
-			showToast( url );
-
-		} );
-
-	} );
-
 	document.getElementById( 'btn-clear' ).addEventListener( 'click', () => {
+
+		if ( ! confirm( 'Clear the entire track?' ) ) return;
 
 		clearAll();
 		showToast( 'Track cleared' );
@@ -922,6 +936,14 @@
 	let pinchStartZoom = 1;
 
 	const el = renderer.domElement;
+
+	function updateCursor() {
+
+		if ( isPanning ) el.style.cursor = 'grabbing';
+		else if ( spaceDown || tool === 'pan' ) el.style.cursor = 'grab';
+		else el.style.cursor = '';
+
+	}
 
 	el.addEventListener( 'contextmenu', ( e ) => e.preventDefault() );
 
@@ -990,15 +1012,15 @@
 		if ( pointers.size > 2 ) return;
 
 		// Single pointer
-		// Middle mouse, ctrl+click, or space+click → pan
-		if ( e.button === 1 || ( e.button === 0 && ( e.ctrlKey || e.metaKey || spaceDown ) ) ) {
+		// Middle mouse, ctrl+click, space+click, or pan tool → pan
+		if ( e.button === 1 || ( e.button === 0 && ( e.ctrlKey || e.metaKey || spaceDown || tool === 'pan' ) ) ) {
 
 			isPanning = true;
 			panStart.x = e.clientX;
 			panStart.y = e.clientY;
 			camStart.x = camTarget.x;
 			camStart.z = camTarget.z;
-			el.style.cursor = 'grabbing';
+			updateCursor();
 			return;
 
 		}
@@ -1078,17 +1100,8 @@
 		if ( e.pointerType === 'mouse' ) {
 
 			const cell = screenToGrid( e.clientX, e.clientY );
-			if ( cell ) {
-
-				hoveredCell = cell;
-				updateGhost( cell.gx, cell.gz );
-
-			} else {
-
-				hoveredCell = null;
-				clearGhost();
-
-			}
+			if ( cell ) updateGhost( cell.gx, cell.gz );
+			else clearGhost();
 
 		}
 
@@ -1111,7 +1124,7 @@
 			isDrawing = false;
 			isErasing = false;
 			lastDrawCell = null;
-			el.style.cursor = spaceDown ? 'grab' : '';
+			updateCursor();
 
 		}
 
@@ -1155,7 +1168,7 @@
 			if ( ! spaceDown ) {
 
 				spaceDown = true;
-				el.style.cursor = 'grab';
+				updateCursor();
 
 			}
 
@@ -1169,6 +1182,10 @@
 
 			selectTool( 'erase' );
 
+		} else if ( e.key === '3' ) {
+
+			selectTool( 'pan' );
+
 		}
 
 	} );
@@ -1178,7 +1195,7 @@
 		if ( e.key === ' ' ) {
 
 			spaceDown = false;
-			if ( ! isPanning ) el.style.cursor = '';
+			updateCursor();
 
 		}
 
