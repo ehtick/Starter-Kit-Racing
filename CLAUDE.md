@@ -1,10 +1,9 @@
 # Starter Kit Racing
 
-Port of the Kenney "Starter Kit Racing" Godot 4.6 project (in `_godot/`) to plain JavaScript and three.js with crashcat physics.
+Port of the Kenney "Starter Kit Racing" Godot 4.6 project to plain JavaScript and three.js with crashcat physics.
 
 ## Structure
 
-- `_godot/` — Original Godot project (reference implementation)
 - `js/` — JavaScript port
   - `main.js` — Entry point, scene setup, game loop
   - `Physics.js` — crashcat wall colliders and sphere body (ported from Godot collision shapes)
@@ -16,7 +15,6 @@ Port of the Kenney "Starter Kit Racing" Godot 4.6 project (in `_godot/`) to plai
   - `Audio.js` — Sound
 - `models/` — GLB models shared between both versions
 - `audio/` — Audio assets
-- `benchmark/` — Physics library benchmark (Rapier vs crashcat vs bounce)
 - `sprites/` — Sprite assets
 
 ## Key conventions
