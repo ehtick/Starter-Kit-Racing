@@ -27,9 +27,9 @@ export class Controls {
 
 		const css = document.createElement( 'style' );
 		css.textContent = `
-			.touch-controls { position: absolute; bottom: 0; left: 0; right: 0; height: 50%; pointer-events: none; z-index: 10; }
-			.steer-zone { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; pointer-events: auto; touch-action: none; }
-			.steer-base { position: absolute; bottom: 32px; left: 32px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); }
+			.touch-controls { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+			.steer-zone { position: absolute; inset: 0; pointer-events: auto; touch-action: none; }
+			.steer-base { position: absolute; width: 140px; height: 140px; margin: -70px 0 0 -70px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); display: none; }
 			.steer-knob { position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; background: rgba(255,255,255,0.35); }
 		`;
 		document.head.appendChild( css );
@@ -62,6 +62,9 @@ export class Controls {
 			this.touchActive = true;
 			this.touchDirX = 0;
 			this.touchDirY = 0;
+			base.style.left = `${ e.clientX }px`;
+			base.style.top = `${ e.clientY }px`;
+			base.style.display = 'block';
 
 		} );
 
@@ -93,6 +96,7 @@ export class Controls {
 			this.touchDirX = 0;
 			this.touchDirY = 0;
 			knob.style.transform = '';
+			base.style.display = 'none';
 
 		};
 
