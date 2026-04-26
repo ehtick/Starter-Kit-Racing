@@ -231,6 +231,7 @@ async function init() {
 	audio.init( cam.camera );
 
 	const _forward = new THREE.Vector3();
+	const _camLead = new THREE.Vector3();
 
 	const contactListener = {
 		onContactAdded( bodyA, bodyB ) {
@@ -268,7 +269,8 @@ async function init() {
 			vehicle.spherePos.z - 5.3
 		);
 
-		cam.update( dt, vehicle.spherePos, vehicle.modelVelocity );
+		_camLead.set( 0, 0, 1 ).applyQuaternion( vehicle.container.quaternion ).multiplyScalar( vehicle.modelVelocity.length() );
+		cam.update( dt, vehicle.spherePos, _camLead );
 		particles.update( dt, vehicle );
 		driftMarks.update( dt, vehicle );
 		audio.update( dt, vehicle.linearSpeed / MAX_SPEED, input.z, vehicle.driftIntensity );
