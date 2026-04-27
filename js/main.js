@@ -221,7 +221,6 @@ async function init() {
 
 	const cam = new Camera();
 	scene.add( cam.debug );
-	cam.smoothedDesired.copy( vehicle.spherePos );
 
 	const controls = new Controls();
 
@@ -272,7 +271,8 @@ async function init() {
 			vehicle.spherePos.z - 5.3
 		);
 
-		_camLead.set( 0, 0, 1 ).applyQuaternion( vehicle.container.quaternion ).multiplyScalar( vehicle.modelVelocity.length() );
+		const mv = vehicle.modelVelocity;
+		_camLead.set( 0, 0, 1 ).applyQuaternion( vehicle.container.quaternion ).multiplyScalar( Math.sqrt( mv.x * mv.x + mv.z * mv.z ) );
 		cam.update( dt, vehicle.spherePos, _camLead );
 		particles.update( dt, vehicle );
 		driftMarks.update( dt, vehicle );

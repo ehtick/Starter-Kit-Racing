@@ -28,6 +28,7 @@ export class Camera {
 		this.screenShiftUp = 1.0;
 
 		this.smoothedDesired = new THREE.Vector3();
+		this.initialized = false;
 
 		const segments = 64;
 		const points = [];
@@ -76,7 +77,9 @@ export class Camera {
 			.addScaledVector( this.camRightXZ, leadX )
 			.addScaledVector( this.camForwardXZ, leadY );
 
-		this.smoothedDesired.lerp( _desired, 1 - Math.exp( - dt * this.cameraSmoothing ) );
+		const alpha = this.initialized ? 1 - Math.exp( - dt * this.cameraSmoothing ) : 1;
+		this.smoothedDesired.lerp( _desired, alpha );
+		this.initialized = true;
 
 		// Hard-clamp: car must not escape the deadzone, even if the lerp lags at high speed.
 		_delta.subVectors( target, this.smoothedDesired );
