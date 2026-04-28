@@ -20,9 +20,9 @@ const _pR = new THREE.Vector3();
 const _cL = new THREE.Vector3();
 const _cR = new THREE.Vector3();
 
-export class DriftMarks {
+class DriftTrail {
 
-	constructor( scene ) {
+	constructor( scene, material ) {
 
 		const positions = new Float32Array( MAX_SEGMENTS * FLOATS_PER_SEGMENT );
 		const colors = new Float32Array( MAX_SEGMENTS * COLOR_FLOATS_PER_SEGMENT );
@@ -49,17 +49,6 @@ export class DriftMarks {
 
 		geometry.setDrawRange( 0, 0 );
 
-		const material = new THREE.MeshBasicMaterial( {
-			color: 0x111111,
-			transparent: true,
-			vertexColors: true,
-			depthWrite: false,
-			side: THREE.DoubleSide,
-			polygonOffset: true,
-			polygonOffsetFactor: - 4,
-			polygonOffsetUnits: - 4,
-		} );
-
 		this.mesh = new THREE.Mesh( geometry, material );
 		this.mesh.frustumCulled = false;
 		this.mesh.renderOrder = - 1;
@@ -70,40 +59,26 @@ export class DriftMarks {
 		this.geometry = geometry;
 		this.segmentIndex = 0;
 		this.drawCount = 0;
-
-		this.states = [
-			{ prev: new THREE.Vector3(), active: false },
-			{ prev: new THREE.Vector3(), active: false },
-		];
+		this.prev = new THREE.Vector3();
+		this.active = false;
 
 	}
 
-	update( dt, vehicle ) {
-
-		const emit = vehicle.driftIntensity > 0.5 && Math.abs( vehicle.linearSpeed ) > 0.15;
-
-		if ( ! emit && ! this.states[ 0 ].active && ! this.states[ 1 ].active ) return;
-
-		this._track( vehicle.wheelBL, vehicle, emit, this.states[ 0 ] );
-		this._track( vehicle.wheelBR, vehicle, emit, this.states[ 1 ] );
-
-	}
-
-	_track( wheel, vehicle, emit, state ) {
+	track( wheel, groundY, intensity, emit ) {
 
 		if ( ! wheel ) return;
 
 		wheel.getWorldPosition( _wheelWorld );
-		_wheelWorld.y = vehicle.container.position.y + Y_OFFSET;
+		_wheelWorld.y = groundY;
 
-		if ( emit && state.active ) {
+		if ( emit && this.active ) {
 
-			this._addSegment( state.prev, _wheelWorld, vehicle.driftIntensity );
+			this._addSegment( this.prev, _wheelWorld, intensity );
 
 		}
 
-		state.prev.copy( _wheelWorld );
-		state.active = emit;
+		this.prev.copy( _wheelWorld );
+		this.active = emit;
 
 	}
 
@@ -160,6 +135,44 @@ export class DriftMarks {
 			this.geometry.setDrawRange( 0, this.drawCount );
 
 		}
+
+	}
+
+}
+
+export class DriftMarks {
+
+	constructor( scene ) {
+
+		const material = new THREE.MeshBasicMaterial( {
+			color: 0x111111,
+			transparent: true,
+			vertexColors: true,
+			depthWrite: false,
+			side: THREE.DoubleSide,
+			polygonOffset: true,
+			polygonOffsetFactor: - 4,
+			polygonOffsetUnits: - 4,
+		} );
+
+		this.trails = [
+			new DriftTrail( scene, material ),
+			new DriftTrail( scene, material ),
+		];
+
+	}
+
+	update( dt, vehicle ) {
+
+		const emit = vehicle.driftIntensity > 0.5 && Math.abs( vehicle.linearSpeed ) > 0.15;
+
+		if ( ! emit && ! this.trails[ 0 ].active && ! this.trails[ 1 ].active ) return;
+
+		const groundY = vehicle.container.position.y + Y_OFFSET;
+		const intensity = vehicle.driftIntensity;
+
+		this.trails[ 0 ].track( vehicle.wheelBL, groundY, intensity, emit );
+		this.trails[ 1 ].track( vehicle.wheelBR, groundY, intensity, emit );
 
 	}
 
