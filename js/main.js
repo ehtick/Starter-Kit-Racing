@@ -226,7 +226,7 @@ async function init() {
 	const controls = new Controls();
 
 	const particles = new SmokeTrails( scene );
-	const driftMarks = new DriftMarks( scene );
+	const driftMarks = new DriftMarks( scene, mapParam );
 
 	const audio = new GameAudio();
 	audio.init( cam.camera );
